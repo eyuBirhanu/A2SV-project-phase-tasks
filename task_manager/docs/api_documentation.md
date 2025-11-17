@@ -1,11 +1,27 @@
 # Task Management API Documentation
 
-This document provides documentation for the Task Management REST API.
+This document provides documentation for the Task Management REST API with MongoDB integration.
 
 ## Base URL
-`http://localhost:8080`
 
----
+http://localhost:8080
+
+## MongoDB Setup
+
+To run this application, you need a running MongoDB instance.
+
+1.  **Install MongoDB:** You can either install it locally or use a cloud service like MongoDB Atlas.
+2.  **Connection String:** The application connects to MongoDB using a connection string. For development, this is set in `data/task_service.go`. It is highly recommended to use an environment variable for this in a production environment.
+
+    Example connection string for a local instance:
+    `mongodb://localhost:27017`
+
+    Example connection string for MongoDB Atlas:
+    `mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority`
+
+3.  **Database and Collection:** The application will automatically create a database named `task_manager` and a collection named `tasks`.
+
+## Endpoints
 
 ## Endpoints
 
