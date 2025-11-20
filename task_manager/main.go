@@ -7,6 +7,8 @@ import (
 
 func main() {
 	data.InitDB()
+
 	r := router.SetupRouter()
+
 	r.Run(":8080")
 }

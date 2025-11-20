@@ -5,25 +5,25 @@ import (
 	"log"
 	"time"
 
+	"task_manager/models"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"task_manager/models"
 )
 
-var client *mongo.Client
-var collection *mongo.Collection
+var TaskCollection *mongo.Collection
+var UserCollection *mongo.Collection
 
 func InitDB() {
-	var err error
-	uri := "mongodb://localhost:27017" 
+	uri := "mongodb://localhost:27017"
 	clientOptions := options.Client().ApplyURI(uri)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	client, err = mongo.Connect(ctx, clientOptions)
+
+	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,7 +33,9 @@ func InitDB() {
 		log.Fatal(err)
 	}
 
-	collection = client.Database("task_manager").Collection("tasks")
+	TaskCollection = client.Database("task_manager").Collection("tasks")
+	UserCollection = client.Database("task_manager").Collection("users")
+
 	log.Println("Connected to MongoDB!")
 }
 
@@ -42,7 +44,7 @@ func GetAllTasks() ([]models.Task, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	cursor, err := collection.Find(ctx, bson.M{})
+	cursor, err := TaskCollection.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +57,6 @@ func GetAllTasks() ([]models.Task, error) {
 		}
 		tasks = append(tasks, task)
 	}
-
 	return tasks, nil
 }
 
@@ -69,7 +70,7 @@ func GetTaskByID(id string) (*models.Task, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err = collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&task)
+	err = TaskCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&task)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +81,7 @@ func CreateTask(task models.Task) (*models.Task, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	result, err := collection.InsertOne(ctx, task)
+	result, err := TaskCollection.InsertOne(ctx, task)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +107,7 @@ func UpdateTask(id string, updatedTask models.Task) (*models.Task, error) {
 		},
 	}
 
-	_, err = collection.UpdateOne(ctx, bson.M{"_id": objID}, update)
+	_, err = TaskCollection.UpdateOne(ctx, bson.M{"_id": objID}, update)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +124,7 @@ func DeleteTask(id string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	result, err := collection.DeleteOne(ctx, bson.M{"_id": objID})
+	result, err := TaskCollection.DeleteOne(ctx, bson.M{"_id": objID})
 	if err != nil {
 		return err
 	}
